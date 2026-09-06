@@ -56,6 +56,13 @@ BeatsFormatter::BeatsFormatter(const QString& formatStr, int fracPart, TimecodeM
 
 void BeatsFormatter::init()
 {
+    if (m_tempo <= 0.0 || m_upperTimeSignature <= 0 || m_lowerTimeSignature <= 0) {
+        m_fields.clear();
+        m_digits.clear();
+        m_fieldLengths.fill(0.0);
+        return;
+    }
+
     const bool formatOk = checkField(1, m_upperTimeSignature) && checkFracField(m_lowerTimeSignature);
 
     // 1/4 = BPM is used for now
@@ -204,7 +211,7 @@ bool BeatsFormatter::checkField(size_t fieldIndex, int value) const
 bool BeatsFormatter::checkFracField(int newLts) const
 {
     if (m_fracPart > newLts) {
-        return checkField(2, m_fracPart / m_lowerTimeSignature);
+        return checkField(2, ticksPerBeat());
     } else {
         return m_fields.size() == 2;
     }
@@ -230,7 +237,7 @@ void BeatsFormatter::updateFields(size_t barsDigits)
     if (hasFracPart) {
         beatsField.label += " ";
         // See the reasoning above about the range
-        m_fields.emplace_back(NumericField::range(std::max(11, m_fracPart / m_lowerTimeSignature + offset)));
+        m_fields.emplace_back(NumericField::range(std::max(11, ticksPerBeat() + offset)));
     }
 
     // Fill the aux m_digits structure
@@ -245,4 +252,9 @@ void BeatsFormatter::updateFields(size_t barsDigits)
 
         pos += m_fields[i].label.length();
     }
+}
+
+int BeatsFormatter::ticksPerBeat() const
+{
+    return m_lowerTimeSignature > 0 ? m_fracPart / m_lowerTimeSignature : 0;
 }

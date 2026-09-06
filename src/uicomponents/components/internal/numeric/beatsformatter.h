@@ -28,8 +28,9 @@ private:
     bool checkField(size_t fieldIndex, int value) const;
     bool checkFracField(int newLts) const;
     void updateFields(size_t barsDigits);
+    int ticksPerBeat() const;
 
-    std::array<double, 3> m_fieldLengths;
+    std::array<double, 3> m_fieldLengths {};
     int m_fracPart = 0;
     TimecodeMode m_mode;
 };
